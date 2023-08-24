@@ -1,6 +1,7 @@
 # Install project dependencies
 install:
-	$(PIP) install -r requirements.txt
+	pip install --upgrade pip &&\
+	pip install -r requirements.txt
 
 # Create and activate virtual environment
 venv:
