@@ -4,23 +4,21 @@ Module for user authentication login routes.
 
 import jwt
 import datetime
-from flask import jsonify, render_template_string, request
-from api.authentication.models import User
-from api import db, mail, bcrypt, s, app
+from flask import jsonify, render_template_string, request,Blueprint
+from api.authentication.models import db,User
+from api import  mail, bcrypt, s
+from config import EMAIL_USER,EMAIL_VERIFY_URI,SECRET_KEY
 from flask_mail import Message
 from utils.login_utils import (
     create_reset_password_body,
     password_reset_form_html,
     password_reset_success_html,
 )
+from api import app
 
-EMAIL_USER = app.config['MAIL_USERNAME']
-EMAIL_PASS = app.config['MAIL_PASSWORD']
-EMAIL_VERIFY_URI = app.config['EMAIL_VERIFY_URI']
+login_routes = Blueprint('login', __name__)
 
-
-
-@app.route('/login', methods=['POST'])
+@login_routes.route('/login', methods=['POST'])
 def login():
     """
     Authenticate user login.
@@ -52,12 +50,12 @@ def login():
         'email': email,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)  # Set session timeout to 30 minutes
     }
-    token = jwt.encode(token_payload, app.config['SECRET_KEY'], algorithm='HS256')
+    token = jwt.encode(token_payload, SECRET_KEY, algorithm='HS256')
 
     # Return the token as a JSON response
     return jsonify({'token': token, 'user_id': user.id}), 200
 
-@app.route('/protected_route', methods=['GET'])
+@login_routes.route('/protected_route', methods=['GET'])
 def protected_route():
     """
     Protect a route with JWT token authorization.
@@ -70,7 +68,7 @@ def protected_route():
         token = token.replace('Bearer ', '')
         #print(token)
         # Decode the token using the secret key
-        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
 
         # You can now use the payload data, such as user ID, to perform actions
         user_id = payload.get('user_id')
@@ -85,7 +83,7 @@ def protected_route():
 
 
 
-@app.route('/forgot_password', methods=['POST'])
+@login_routes.route('/forgot_password', methods=['POST'])
 def forgot_password():
     """
     Initiate the process of password reset.
@@ -108,7 +106,7 @@ def forgot_password():
 
     return jsonify({'success': 'The Password reset link is sent on your mail.'})
 
-@app.route('/reset/<token>', methods=['GET', 'POST'])
+@login_routes.route('/reset/<token>', methods=['GET', 'POST'])
 def reset(token):
     """
     Reset user password.
@@ -150,3 +148,5 @@ def reset(token):
             return "Link expired or invalid."
     else:
         return "Method not allowed."
+    
+app.register_blueprint(login_routes)  # Register the blueprint

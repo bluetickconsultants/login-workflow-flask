@@ -3,9 +3,9 @@ Module for User registration, confirmation, and related functionality.
 """
 
 import datetime
-from flask import jsonify, render_template_string, request
-from api.authentication.models import User
-from api import db, mail, bcrypt, s, app
+from flask import jsonify, render_template_string, request,Blueprint
+from api.authentication.models import User,db
+from api import  mail, bcrypt, s, app
 from flask_mail import Message
 from utils.login_utils import create_verification_email_body, email_verified_success_html
 
@@ -14,7 +14,10 @@ EMAIL_USER = app.config['MAIL_USERNAME']
 EMAIL_PASS = app.config['MAIL_PASSWORD']
 EMAIL_VERIFY_URI = app.config['EMAIL_VERIFY_URI']
 
-@app.route('/register', methods=['POST'])
+
+register_routes = Blueprint('register', __name__)
+
+@register_routes.route('/register', methods=['POST'])
 def register():
     """
     Register a new user.
@@ -55,7 +58,7 @@ def register():
                 db.session.rollback()
                 return jsonify({'error': str(exception)}), 401
 
-@app.route('/confirm/<token>')
+@register_routes.route('/confirm/<token>')
 def confirm(token):
     """
     Confirm user's email address.
@@ -76,3 +79,5 @@ def confirm(token):
             return "User not found."
     except Exception:
         return "Link expired or invalid."
+    
+app.register_blueprint(register_routes)

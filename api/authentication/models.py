@@ -4,7 +4,10 @@ Module for User model and related functionality.
 
 from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer, BadSignature
-from api import db, app
+from api import app
+from config import SECRET_KEY
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy(app)
 
 class User(db.Model, UserMixin):
     """
@@ -22,7 +25,7 @@ class User(db.Model, UserMixin):
         """
         Generate a reset token for password reset.
         """
-        url_serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"], expires_sec)
+        url_serializer = URLSafeTimedSerializer(SECRET_KEY, expires_sec)
         return url_serializer.dumps({'user_id': self.id}).decode('utf-8')
 
     @staticmethod
@@ -30,7 +33,7 @@ class User(db.Model, UserMixin):
         """
         Verify a reset token and return the associated user.
         """
-        url_serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+        url_serializer = URLSafeTimedSerializer(SECRET_KEY)
         try:
             user_id = url_serializer.loads(token)['user_id']
         except BadSignature:
