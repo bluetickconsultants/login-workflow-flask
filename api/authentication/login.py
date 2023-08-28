@@ -5,8 +5,8 @@ Module for user authentication login routes.
 import jwt
 import datetime
 from flask import jsonify, render_template_string, request
-from app.authentication.models import User
-from app import db, mail, bcrypt, s, app
+from api.authentication.models import User
+from api import db, mail, bcrypt, s, app
 from flask_mail import Message
 from utils.login_utils import (
     create_reset_password_body,

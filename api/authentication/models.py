@@ -4,7 +4,7 @@ Module for User model and related functionality.
 
 from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer, BadSignature
-from app import db, app
+from api import db, app
 
 class User(db.Model, UserMixin):
     """

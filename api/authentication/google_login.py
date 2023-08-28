@@ -10,7 +10,7 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from google.auth.exceptions import RefreshError
 from flask import session, redirect, request,abort,jsonify
-from app import app
+from api import app
 
 # Google OAuth2 configuration
 GOOGLE_CLIENT_ID = "your-google-client-id"
