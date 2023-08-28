@@ -1,3 +1,8 @@
+"""
+config.py
+
+This module contains the configuration settings for your Flask application.
+"""
 import os
 SECRET_KEY = os.urandom(20)
 SQLALCHEMY_DATABASE_URI = 'sqlite:///database.db'

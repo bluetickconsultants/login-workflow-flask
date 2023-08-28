@@ -1,4 +1,17 @@
+"""
+Module for utility functions related to user login.
+"""
+
 def create_reset_password_body(link):
+    """
+    Generates the HTML content for the reset password email.
+    
+    Args:
+        link (str): The URL to the reset password endpoint.
+    
+    Returns:
+        str: The HTML content for the reset password email.
+    """
     html_head = '''
 <!DOCTYPE html>
 <html lang="en">
@@ -55,13 +68,13 @@ def create_reset_password_body(link):
     <h2>Reset Password</h2>
     <p>Dear user,</p>
     
-	<p>To reset the password, please click the "Reset Password" button below:</p>
+    <p>To reset the password, please click the "Reset Password" button below:</p>
     <div class="button-container">
       <a href={link} class="verify-button">Reset Password</a>
     </div>
   </div>
   <div class="footer">
-    Bluetick Consulatants LLP &bull; Bangalore, India &bull;  <a href="https://www.bluetickconsultants.com">www.bluetickconsultants.com</a>
+    Bluetick Consultants LLP &bull; Bangalore, India &bull;  <a href="https://www.bluetickconsultants.com">www.bluetickconsultants.com</a>
   </div>
 </body>
 </html>
@@ -70,6 +83,15 @@ def create_reset_password_body(link):
     return html_head + html_body
 
 def password_reset_form_html(token):
+    """
+    Generates the HTML content for the password reset form.
+    
+    Args:
+        token (str): The reset token.
+    
+    Returns:
+        str: The HTML content for the password reset form.
+    """
     html_head = """
 <!DOCTYPE html>
 <html>
@@ -190,6 +212,15 @@ def password_reset_form_html(token):
 
 
 def password_reset_success_html(link):
+    """
+    Generates the HTML content for the password reset success page.
+    
+    Args:
+        link (str): The URL to the login page.
+    
+    Returns:
+        str: The HTML content for the password reset success page.
+    """
     html_head = """
 <!DOCTYPE html>
 <html>

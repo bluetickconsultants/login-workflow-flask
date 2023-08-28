@@ -8,3 +8,11 @@ install:
 format:
 	black .*py
 
+# Run pylint on all Python files
+lint:
+	find . -name "*.py" | xargs pylint
+
+.PHONY: install format lint
+
+# Run all code quality checks
+quality: format lint

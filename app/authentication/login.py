@@ -1,14 +1,21 @@
-from flask import jsonify, render_template_string, request
+"""
+Module for user authentication login routes.
+"""
+
 import jwt
 import datetime
-from app import db, mail,bcrypt,s,app
-from flask_mail import Mail, Message
+from flask import jsonify, render_template_string, request
 from app.authentication.models import User
-from utils.login_utils import create_reset_password_body,password_reset_form_html,password_reset_success_html
+from app import db, mail, bcrypt, s, app
+from flask_mail import Message
+from utils.login_utils import (
+    create_reset_password_body,
+    password_reset_form_html,
+    password_reset_success_html,
+)
 
-
-EMAIL_USER = app.config['MAIL_USERNAME'] 
-EMAIL_PASS = app.config['MAIL_PASSWORD'] 
+EMAIL_USER = app.config['MAIL_USERNAME']
+EMAIL_PASS = app.config['MAIL_PASSWORD']
 EMAIL_VERIFY_URI = app.config['EMAIL_VERIFY_URI']
 
 
@@ -50,16 +57,12 @@ def login():
 @app.route('/protected_route', methods=['GET'])
 def protected_route():
     token = request.headers.get('Authorization')
-
-
     if not token:
         return jsonify({'error': 'Authorization token missing.'}), 401
-
     try:
         # Remove 'Bearer ' prefix from the token
         token = token.replace('Bearer ', '')
-        print(token)
-
+        #print(token)
         # Decode the token using the secret key
         payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
 
@@ -76,30 +79,25 @@ def protected_route():
 
 
 
-@app.route('/forgot_password',methods=['POST'])
+@app.route('/forgot_password', methods=['POST'])
 def forgot_password():
     data = request.get_json()
     print(data)
     email = data.get('email')
     if not email:
-        return jsonify({'error':'Please enter an email'}),400
+        return jsonify({'error': 'Please enter an email'}), 400
     user = User.query.filter_by(email=email).first()
     if not user:
-        return jsonify({'error':'There is no account with that email. You must register first.'}),400
-    
+        return jsonify({'error': 'There is no account with that email. You must register first.'}), 400
     token = s.dumps(email, salt='password-reset-link')
     confirm_route = 'reset'
     link = f'{EMAIL_VERIFY_URI}/{confirm_route}/{token}'
 
     html_content = create_reset_password_body(link)
-                
-    msg = Message('reset password',sender=EMAIL_USER,recipients=[email],html=html_content)
-                
-                # print(link)
-                
-    mail.send(msg) 
-    
-    return jsonify({'success':'The Password reset link is sent on your mail.'})
+    msg = Message('reset password', sender=EMAIL_USER, recipients=[email], html=html_content)
+    mail.send(msg)
+
+    return jsonify({'success': 'The Password reset link is sent on your mail.'})
 
 @app.route('/reset/<token>', methods=['GET', 'POST'])
 def reset(token):
@@ -108,15 +106,12 @@ def reset(token):
             email = s.loads(token, salt='password-reset-link', max_age=1800)
             # Assuming User is your SQLAlchemy User model
             user = User.query.filter_by(email=email).first()
-            if user:
-                # Here, you can render the HTML template for resetting password
-                # You can include the new password form here and send it to the frontend
-                html_content = password_reset_form_html(token)
-                return render_template_string(html_content)
-            else:
-                return "User not found."
-        except Exception:
-            return "Link expired or invalid."
+            # Here, you can render the HTML template for resetting password
+            # You can include the new password form here and send it to the frontend
+            html_content = password_reset_form_html(token)
+            return render_template_string(html_content)
+        except Exception as error:
+            return str(error)
     elif request.method == 'POST':
         token = request.form.get('token')
         new_password = request.form.get('new_password')
