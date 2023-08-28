@@ -22,6 +22,9 @@ EMAIL_VERIFY_URI = app.config['EMAIL_VERIFY_URI']
 
 @app.route('/login', methods=['POST'])
 def login():
+    """
+    Authenticate user login.
+    """
     data = request.get_json()
     print("Login Request Data:", data)
 
@@ -56,6 +59,9 @@ def login():
 
 @app.route('/protected_route', methods=['GET'])
 def protected_route():
+    """
+    Protect a route with JWT token authorization.
+    """
     token = request.headers.get('Authorization')
     if not token:
         return jsonify({'error': 'Authorization token missing.'}), 401
@@ -81,6 +87,9 @@ def protected_route():
 
 @app.route('/forgot_password', methods=['POST'])
 def forgot_password():
+    """
+    Initiate the process of password reset.
+    """
     data = request.get_json()
     print(data)
     email = data.get('email')
@@ -101,6 +110,9 @@ def forgot_password():
 
 @app.route('/reset/<token>', methods=['GET', 'POST'])
 def reset(token):
+    """
+    Reset user password.
+    """
     if request.method == 'GET':
         try:
             email = s.loads(token, salt='password-reset-link', max_age=1800)

@@ -8,6 +8,8 @@ project_folder/
 |   |   |-- login.py
 |   |   |-- models.py
 |   |   |-- register.py
+|-- tests/
+|   |-- test_authentication.py
 |-- utils/
 |   |-- login_utils.py
 |   |-- register_utils.py
