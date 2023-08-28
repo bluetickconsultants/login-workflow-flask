@@ -14,5 +14,9 @@ lint:
 
 .PHONY: install format lint
 
+# Run tests using unittest
+test:
+	python -m unittest discover tests
+
 # Run all code quality checks
 quality: format lint
