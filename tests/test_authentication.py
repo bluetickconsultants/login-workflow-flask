@@ -1,6 +1,6 @@
 import unittest
-from api import app
-from api.authentication.models import db
+from api import app,db
+
 
 class AuthenticationTestCase(unittest.TestCase):
     """

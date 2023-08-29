@@ -4,10 +4,12 @@ Module for User model and related functionality.
 
 from flask_login import UserMixin
 from itsdangerous import URLSafeTimedSerializer, BadSignature
-from api import app
 from config import SECRET_KEY
-from flask_sqlalchemy import SQLAlchemy
-db = SQLAlchemy(app)
+from api import db
+
+
+
+
 
 class User(db.Model, UserMixin):
     """

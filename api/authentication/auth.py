@@ -4,21 +4,24 @@ Module for user authentication login routes.
 
 import jwt
 import datetime
-from flask import jsonify, render_template_string, request,Blueprint
-from api.authentication.models import db,User
-from api import  mail, bcrypt, s
+from flask import jsonify, render_template_string, request
+from api.authentication.models import User
 from config import EMAIL_USER,EMAIL_VERIFY_URI,SECRET_KEY
 from flask_mail import Message
-from utils.login_utils import (
+from api import app,bcrypt,s,db,mail
+from config import *
+from utils.email_templates import (
     create_reset_password_body,
     password_reset_form_html,
     password_reset_success_html,
+    create_verification_email_body,
+      email_verified_success_html
 )
-from api import app
 
-login_routes = Blueprint('login', __name__)
 
-@login_routes.route('/login', methods=['POST'])
+# auth_routes = Blueprint('authentication', __name__)
+
+@app.route('/login', methods=['POST'])
 def login():
     """
     Authenticate user login.
@@ -55,7 +58,7 @@ def login():
     # Return the token as a JSON response
     return jsonify({'token': token, 'user_id': user.id}), 200
 
-@login_routes.route('/protected_route', methods=['GET'])
+@app.route('/protected_route', methods=['GET'])
 def protected_route():
     """
     Protect a route with JWT token authorization.
@@ -83,7 +86,7 @@ def protected_route():
 
 
 
-@login_routes.route('/forgot_password', methods=['POST'])
+@app.route('/forgot_password', methods=['POST'])
 def forgot_password():
     """
     Initiate the process of password reset.
@@ -106,7 +109,7 @@ def forgot_password():
 
     return jsonify({'success': 'The Password reset link is sent on your mail.'})
 
-@login_routes.route('/reset/<token>', methods=['GET', 'POST'])
+@app.route('/reset/<token>', methods=['GET', 'POST'])
 def reset(token):
     """
     Reset user password.
@@ -148,5 +151,68 @@ def reset(token):
             return "Link expired or invalid."
     else:
         return "Method not allowed."
+
+@app.route('/register', methods=['POST'])
+def register():
+    """
+    Register a new user.
+    """
+    if request.method == 'POST':
+        data = request.get_json()
+        print(data)
+        email = data.get('email')
+        password = data.get('password')
+
+        # Check if email and password are provided in the request body
+        if not email or not password:
+            return jsonify({'error': 'Email and password are required.'}), 400
+        existing_user_email = User.query.filter_by(email=email).first()
+        if existing_user_email:
+            return jsonify({'error': 'Email already exists.'}), 401
+        else:
+            try:
+                password_encoded = password.encode('utf-8')
+                hashed_password = bcrypt.generate_password_hash(password_encoded)
+                new_user = User(email=email, password=hashed_password)
+                
+                db.session.add(new_user)
+                db.session.commit()
+                
+                token = s.dumps(email, salt='email-confirmation-link')
+                confirm_route = 'confirm'
+                link = f'{EMAIL_VERIFY_URI}/{confirm_route}/{token}'
+
+                html_content = create_verification_email_body(link)
+                
+                msg = Message('verification', sender=EMAIL_USER, recipients=[email], html=html_content)
+                
+                mail.send(msg) 
+                
+                return jsonify({"message": "User created successfully"}), 200
+            except Exception as exception:
+                db.session.rollback()
+                return jsonify({'error': str(exception)}), 401
+
+@app.route('/confirm/<token>')
+def confirm(token):
+    """
+    Confirm user's email address.
+    """
+    try:
+        email = s.loads(token, salt='email-confirmation-link', max_age=1800)
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.email_confirmed = True
+            user.email_confirmed_on = datetime.datetime.now()
+            db.session.commit()
+            
+            login_url = "http://pdf.bluetickconsultants.com/login.html"
+            html_content = email_verified_success_html(login_url)
+            
+            return render_template_string(html_content)
+        else:
+            return "User not found."
+    except Exception:
+        return "Link expired or invalid."
     
-app.register_blueprint(login_routes)  # Register the blueprint
+

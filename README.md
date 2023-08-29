@@ -2,19 +2,18 @@
 Complete login workflow including register, email verification, login, forgot password and google login
 
 project_folder/
-|-- app/
-|   |-- __init__.py
+|-- api/
 |   |-- authentication/
-|   |   |-- login.py
+|   |   |-- auth.py
 |   |   |-- models.py
-|   |   |-- register.py
+|   |   |-- google_auth.py
 |-- tests/
 |   |-- test_authentication.py
 |-- utils/
-|   |-- login_utils.py
-|   |-- register_utils.py
+|   |-- email_templates.py
 |   |-- google_login_utils.py
 |-- config.py
+|-- app.py
 |-- Makefile
 |-- README.md
 |-- requirements.txt
