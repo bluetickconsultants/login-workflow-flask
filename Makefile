@@ -6,7 +6,7 @@ install:
 
 # Format code using Black
 format:
-	black .*py
+	find . -name "*.py" | xargs black
 
 # Run pylint on all Python files
 lint:

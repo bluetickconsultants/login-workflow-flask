@@ -2,17 +2,18 @@
 Module for utility functions related to user login.
 """
 
+
 def create_reset_password_body(link):
     """
     Generates the HTML content for the reset password email.
-    
+
     Args:
         link (str): The URL to the reset password endpoint.
-    
+
     Returns:
         str: The HTML content for the reset password email.
     """
-    html_head = '''
+    html_head = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,8 +59,8 @@ def create_reset_password_body(link):
     color: #999999;
   }
 </style>
-</head>'''
-    html_body = f'''
+</head>"""
+    html_body = f"""
 <body>
   <div class="container">
     <div class="logo">
@@ -78,17 +79,18 @@ def create_reset_password_body(link):
   </div>
 </body>
 </html>
-'''
-    
+"""
+
     return html_head + html_body
+
 
 def password_reset_form_html(token):
     """
     Generates the HTML content for the password reset form.
-    
+
     Args:
         token (str): The reset token.
-    
+
     Returns:
         str: The HTML content for the password reset form.
     """
@@ -210,14 +212,13 @@ def password_reset_form_html(token):
     return html_head + html_body
 
 
-
 def password_reset_success_html(link):
     """
     Generates the HTML content for the password reset success page.
-    
+
     Args:
         link (str): The URL to the login page.
-    
+
     Returns:
         str: The HTML content for the password reset success page.
     """
@@ -296,13 +297,14 @@ def password_reset_success_html(link):
 
     return html_head + html_body
 
+
 def email_verified_success_html(link):
     """
     Generates the HTML content for the email verification success page.
-    
+
     Args:
         link (str): The URL to the login page.
-    
+
     Returns:
         str: The HTML content for the email verification success page.
     """
@@ -371,17 +373,18 @@ def email_verified_success_html(link):
 
     return html_head + html_body
 
+
 def create_verification_email_body(link):
     """
     Generates the HTML content for the email verification email.
-    
+
     Args:
         link (str): The URL to the email verification endpoint.
-    
+
     Returns:
         str: The HTML content for the email verification email.
     """
-    html_head = '''
+    html_head = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -427,8 +430,8 @@ def create_verification_email_body(link):
     color: #999999;
   }
 </style>
-</head>'''
-    html_body = f'''
+</head>"""
+    html_body = f"""
 <body>
   <div class="container">
     <div class="logo">
@@ -447,7 +450,6 @@ def create_verification_email_body(link):
   </div>
 </body>
 </html>
-'''
-    
-    return html_head + html_body
+"""
 
+    return html_head + html_body

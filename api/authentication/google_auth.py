@@ -9,8 +9,8 @@ import google.auth.transport.requests
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from google.auth.exceptions import RefreshError
-from flask import session, redirect, request,abort,jsonify
-from api import app
+from flask import session, redirect, request, abort, jsonify
+from api.authentication.auth import app
 
 # Google OAuth2 configuration
 GOOGLE_CLIENT_ID = "your-google-client-id"
@@ -20,8 +20,9 @@ GOOGLE_SCOPES = ["openid", "profile", "email"]
 flow = Flow.from_client_secrets_file(
     "path/to/client_secrets.json",
     scopes=GOOGLE_SCOPES,
-    redirect_uri="your-redirect-uri"
+    redirect_uri="your-redirect-uri",
 )
+
 
 @app.route("/google_login")
 def google_login():
@@ -31,6 +32,7 @@ def google_login():
     authorization_url, state = flow.authorization_url()
     session["state"] = state
     return redirect(authorization_url)
+
 
 @app.route("/callback")
 def callback():
@@ -52,11 +54,11 @@ def callback():
             id_info = id_token.verify_oauth2_token(
                 id_token=credentials._id_token,
                 request=token_request,
-                audience=GOOGLE_CLIENT_ID
+                audience=GOOGLE_CLIENT_ID,
             )
             session["google_id"] = id_info.get("sub")
             session["name"] = id_info.get("name")
-            return jsonify({"success":"successfully authorised"})
+            return jsonify({"success": "successfully authorised"})
         except RefreshError as refresh_error:
             if "Token used too early" in str(refresh_error):
                 current_time = int(datetime.now().timestamp())
