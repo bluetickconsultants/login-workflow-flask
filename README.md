@@ -7,12 +7,12 @@ This project provides a complete login workflow including user registration, ema
 ## Components
 api/authentication: Contains authentication-related functionality.
 
-auth.py: Defines authentication routes and logic. models.py: Defines the User model and database schema. google_auth.py: Implements Google login functionality. tests: Contains unit tests for the authentication functionality.
-
-test_authentication.py: Unit tests for the authentication routes. utils: Contains utility files.
-
-email_templates.py: Provides email templates for verification and password reset emails. google_login_utils.py: Contains utilities for implementing Google login.
-
+auth.py: Defines authentication routes and logic. 
+models.py: Defines the User model and database schema. 
+google_auth.py: Implements Google login functionality.
+test_authentication.py: Unit tests for the authentication routes. 
+utils: Contains utility files.
+email_templates.py: Provides email templates for verification and password reset emails.
 
 
 ## Configuration
