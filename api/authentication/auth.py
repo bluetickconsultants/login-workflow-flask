@@ -9,7 +9,7 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
-from config import EMAIL_USER, EMAIL_VERIFY_URI, SECRET_KEY
+from config import EMAIL_USER, EMAIL_VERIFY_URI, SECRET_KEY,EMAIL_PASS
 from api.authentication.models import User,db
 from utils.email_templates import (
     create_reset_password_body,
@@ -20,9 +20,18 @@ from utils.email_templates import (
 )
 
 app = Flask(__name__)
-mail = Mail(app)
+
 bcrypt = Bcrypt(app)
 s = URLSafeTimedSerializer(SECRET_KEY)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = EMAIL_USER
+app.config['MAIL_PASSWORD'] = EMAIL_PASS
+
+mail = Mail(app)
 
 
 @app.route("/login", methods=["POST"])
@@ -110,6 +119,9 @@ def forgot_password():
             ),
             400,
         )
+    if not user.email_confirmed:
+        return (jsonify({"error":"Please verify your account first."}))
+    
     token = s.dumps(email, salt="password-reset-link")
     confirm_route = "reset"
     link = f"{EMAIL_VERIFY_URI}/{confirm_route}/{token}"
