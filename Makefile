@@ -20,3 +20,7 @@ test:
 
 # Run all code quality checks
 quality: format lint
+
+# Run the Flask app
+run:
+	python app.py

@@ -10,7 +10,7 @@ from flask_mail import Mail
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
 from config import EMAIL_USER, EMAIL_VERIFY_URI, SECRET_KEY
-from api.authentication.models import User
+from api.authentication.models import User,db
 from utils.email_templates import (
     create_reset_password_body,
     password_reset_form_html,
@@ -192,8 +192,7 @@ def register():
                 hashed_password = bcrypt.generate_password_hash(password_encoded)
                 new_user = User(email=email, password=hashed_password)
 
-                db.session.add(new_user)
-                db.session.commit()
+
 
                 token = s.dumps(email, salt="email-confirmation-link")
                 confirm_route = "confirm"
@@ -209,6 +208,8 @@ def register():
                 )
 
                 mail.send(msg)
+                db.session.add(new_user)
+                db.session.commit()
 
                 return jsonify({"message": "User created successfully"}), 200
             except Exception as exception:
