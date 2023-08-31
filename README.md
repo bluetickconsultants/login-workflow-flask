@@ -23,5 +23,5 @@ app.py: Main entry point of the application, initializes the Flask app and sets 
 
 ## Usage
 
-Install required packages using pip install -r requirements.txt. Configure the settings in config.py such as database URLs, email settings, etc. Run tests using make test. Start the Flask app using make run.
+Install required packages using make install or  pip install -r requirements.txt. Configure the settings in config.py such as database URLs, email settings, etc. Run tests using make test. Start the Flask app using make run.
 
