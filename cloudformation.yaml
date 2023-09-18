@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: EC2 instance with Elastic IP, Key Pair, and Load Balancer
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      AvailabilityZone: ap-south-1a
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !Ref EC2SecurityGroup
+      KeyName: generative-ai-key
+      ImageId: ami-0123456789abcdef0 # Replace with your desired AMI ID
+      Tags:
+        - Key: Name
+          Value: generative-app
+
+  ElasticIP:
+    Type: AWS::EC2::EIP
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for generative-app EC2 instance
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0 # You may want to restrict this to your IP or a specific IP range for security.
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: generative-app-lb
+      Subnets:
+        - subnet-12345678 # Replace with your subnet IDs
+      SecurityGroups:
+        - !Ref LBSecurityGroup
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: "60"
+      Tags:
+        - Key: Name
+          Value: generative-app-lb
+
+  LBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            ContentType: text/plain
+            StatusCode: 200
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: generative-app-target-group
+      Port: 80
+      Protocol: HTTP
+      TargetType: instance
+      VpcId: vpc-0123456789abcdef0 # Replace with your VPC ID
+
+  EC2Target:
+    Type: AWS::ElasticLoadBalancingV2::Target
+    Properties:
+      TargetGroupArn: !Ref TargetGroup
+      TargetId: !Ref EC2Instance
+
+Outputs:
+  PublicIPAddress:
+    Description: Public IP address of the EC2 instance
+    Value: !GetAtt EC2Instance.PublicIp
