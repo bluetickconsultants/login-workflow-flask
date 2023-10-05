@@ -19,10 +19,12 @@ class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
-    password = db.Column(db.String(80), nullable=False)
-    email_confirmation_sent_on = db.Column(db.DateTime, nullable=True)
+    password = db.Column(db.String(80), nullable=True)
+    google_id = db.Column(db.String(100), nullable=True)
     email_confirmed = db.Column(db.Boolean, nullable=True, default=False)
+    email_confirmation_sent_on = db.Column(db.DateTime, nullable=True)
     email_confirmed_on = db.Column(db.DateTime, nullable=True)
+    last_login = db.Column(db.DateTime, nullable=True)
 
     def get_reset_token(self, expires_sec=1800):
         """

@@ -3,11 +3,12 @@ Module for user authentication login routes.
 """
 
 import jwt
-import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 import time
 import os
 import pathlib
+import requests
+from flask_cors import CORS
 from flask import jsonify, render_template_string, request, Flask, session, Response, redirect, json
 import google.auth.transport.requests
 from pip._vendor import cachecontrol
@@ -18,7 +19,7 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
-from config import EMAIL_USER, EMAIL_VERIFY_URI, SECRET_KEY, EMAIL_PASS, REDIRECT_URI
+from config import EMAIL_USER, EMAIL_VERIFY_URI, SECRET_KEY, EMAIL_PASS, REDIRECT_URI, GOOGLE_CLIENT_ID, FRONTEND_URL
 from api.authentication.models import User, db
 from utils.email_templates import (
     create_reset_password_body,
@@ -29,7 +30,7 @@ from utils.email_templates import (
 )
 
 app = Flask(__name__)
-
+CORS(app)
 bcrypt = Bcrypt(app)
 s = URLSafeTimedSerializer(SECRET_KEY)
 
@@ -39,6 +40,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = EMAIL_USER
 app.config['MAIL_PASSWORD'] = EMAIL_PASS
+app.config['SECRET_KEY'] = SECRET_KEY
 
 mail = Mail(app)
 
@@ -81,7 +83,6 @@ def Generate_JWT(payload):
 def api_google_login():
     if request.is_json:
         # Handle JSON request
-        # Continue with your Google login logic
         global state
         authorization_url, state = flow.authorization_url()
         # Store the state so the callback can verify the auth server response.
@@ -96,37 +97,26 @@ def api_google_login():
 @app.route("/callback", methods=["GET", "POST"])
 def api_callback():
     try:
-        # print("im here")
 
-        # Handle JSON request
-        # json_data = request.get_json()
-        # print(json_data)
         authorization_response = request.url
-        # print("autho_res: ",authorization_response)
-
-        # print("now here")
         # Implement a retry mechanism for fetching the token
         credentials = fetch_token_with_retry(flow, authorization_response)
-        # print("creds: ",credentials)
+
         if credentials is None:
             return jsonify({"error": "Token request failed."})
-        # print("now here i am")
 
         received_state = str(request.args.get("state"))
         stored_state = str(state)
 
         if received_state != stored_state:
-            return jsonify({"error": "CSRF Warning! State not equal in request and response.mera wala"})
+            return jsonify({"error": "CSRF Warning! State not equal in request and response"})
 
         credentials = flow.credentials
-        # print("creds fine")
+
         request_session = requests.session()
-        # print("req_sess fine")
         cached_session = cachecontrol.CacheControl(request_session)
-        # print("cach_sess fine")
         token_request = google.auth.transport.requests.Request(
             session=cached_session)
-        # print("token fine")
 
         try:
             id_info = id_token.verify_oauth2_token(
